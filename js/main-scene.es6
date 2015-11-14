@@ -63,7 +63,7 @@ export class MainScene extends SheenScene {
       var man = new SheenMesh({
         modelName: 'js/models/bigman.json',
         scale: 0.1,
-        position: new THREE.Vector3(0, 0, 10)
+        position: new THREE.Vector3(0, -10, 10)
       });
 
       man.addTo(this.controlObject, () => {
@@ -79,17 +79,22 @@ export class MainScene extends SheenScene {
       var groundMirror = new THREE.Mirror(this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color: 0x777777 } );
 			var mirrorMesh = new THREE.Mesh( planeGeo, groundMirror.material );
 			mirrorMesh.add( groundMirror );
+      mirrorMesh.position.z = 100;
+      mirrorMesh.position.y = 100;
 			mirrorMesh.rotateX( - Math.PI / 2 );
 			this.scene.add( mirrorMesh );
 
-      this.groundMirror = groundMirror; 
+      this.groundMirror = groundMirror;
 
 
       var verticalMirror = new THREE.Mirror( this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color:0x889999 } );
-			var verticalMirrorMesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 60, 60 ), verticalMirror.material );
+      var mirrorMaterial = verticalMirror.material;
+
+			var verticalMirrorMesh = new THREE.Mesh( new THREE.PlaneGeometry(40, 40, 40), mirrorMaterial );
 			verticalMirrorMesh.add( verticalMirror );
-			verticalMirrorMesh.position.y = 0;
-			verticalMirrorMesh.position.z = 0;
+			verticalMirrorMesh.position.y = 5;
+			verticalMirrorMesh.position.z = -100;
+      verticalMirrorMesh.position.x = 0;
 			this.scene.add(verticalMirrorMesh);
 
       this.verticalMirror = verticalMirror;
