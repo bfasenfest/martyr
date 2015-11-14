@@ -3,10 +3,13 @@ var THREE = require('three');
 var $ = require('jquery');
 var buzz = require('./lib/buzz');
 var kt = require('kutility');
+require('./lib/Mirror');
 var TWEEN = require('tween.js');
+var SheenMesh = require('./sheen-mesh');
 
 import {createGround, createWall, makePhysicsMaterial} from './util/builder.es6';
 import {SheenScene} from './sheen-scene.es6';
+
 
 export class MainScene extends SheenScene {
 
@@ -29,6 +32,11 @@ export class MainScene extends SheenScene {
 
     this.controlObject = this.controls.getObject();
 
+    var skindisp = THREE.ImageUtils.loadTexture( "/media/skindisp.png" );
+    skindisp.wrapS = THREE.RepeatWrapping;
+    skindisp.wrapT = THREE.RepeatWrapping;
+    skindisp.repeat.set(10, 10);
+
     if (!this.domMode) {
       // the heaven and the lights
       this.makeLights();
@@ -38,19 +46,53 @@ export class MainScene extends SheenScene {
       this.ground = createGround({
         length: this.roomLength,
         y: 0,
-        material: this.newStructureMaterial(null)
+        material: this.newStructureMaterial(null, 0x101010)
       });
       this.ground.addTo(this.scene);
 
       this.walls = [
-        createWall({direction: 'back', roomLength: this.roomLength, wallHeight: this.roomLength, material: this.newStructureMaterial(null)}),
-        createWall({direction: 'left', roomLength: this.roomLength, wallHeight: this.roomLength, material: this.newStructureMaterial(null)}),
-        createWall({direction: 'right', roomLength: this.roomLength, wallHeight: this.roomLength, material: this.newStructureMaterial(null)}),
-        createWall({direction: 'front', roomLength: this.roomLength, wallHeight: this.roomLength, material: this.newStructureMaterial(null)})
+        createWall({direction: 'back', roomLength: this.roomLength, wallHeight: this.roomLength, material: this.newStructureMaterial(null, 0x101010)}),
+        createWall({direction: 'left', roomLength: this.roomLength, wallHeight: this.roomLength, material: this.newStructureMaterial(null, 0x101010)}),
+        createWall({direction: 'right', roomLength: this.roomLength, wallHeight: this.roomLength, material: this.newStructureMaterial(null, 0x101010)}),
+        createWall({direction: 'front', roomLength: this.roomLength, wallHeight: this.roomLength, material: this.newStructureMaterial(null, 0xff0000)})
       ];
       this.walls.forEach((wall) => {
         wall.addTo(this.scene);
       });
+
+      var man = new SheenMesh({
+        modelName: 'js/models/bigman.json',
+        scale: 0.1,
+        position: new THREE.Vector3(0, 0, 10)
+      });
+
+      man.addTo(this.controlObject, () => {
+        man.rotate(0, Math.PI * (11/10), 0);
+
+        var material = man.mesh.material.materials[0];
+        //material.bumpMap = skindisp;
+        //material.bumpScale = 0.5;
+      });
+
+      var planeGeo = new THREE.PlaneBufferGeometry( 100.1, 100.1 );
+
+      var groundMirror = new THREE.Mirror(this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color: 0x777777 } );
+			var mirrorMesh = new THREE.Mesh( planeGeo, groundMirror.material );
+			mirrorMesh.add( groundMirror );
+			mirrorMesh.rotateX( - Math.PI / 2 );
+			this.scene.add( mirrorMesh );
+
+      this.groundMirror = groundMirror; 
+
+
+      var verticalMirror = new THREE.Mirror( this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color:0x889999 } );
+			var verticalMirrorMesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 60, 60 ), verticalMirror.material );
+			verticalMirrorMesh.add( verticalMirror );
+			verticalMirrorMesh.position.y = 0;
+			verticalMirrorMesh.position.z = 0;
+			this.scene.add(verticalMirrorMesh);
+
+      this.verticalMirror = verticalMirror;
     }
   }
 
@@ -63,7 +105,11 @@ export class MainScene extends SheenScene {
   update(dt) {
     super.update(dt);
 
-    // HERE IS CALLED 60 TIMES PER SECOND
+    // render (update) the mirrors
+    if (this.verticalMirror) {
+      this.verticalMirror.renderWithMirror(this.groundMirror);
+      this.groundMirror.renderWithMirror(this.verticalMirror);
+    }
   }
 
   // Interaction
@@ -149,10 +195,10 @@ export class MainScene extends SheenScene {
     this.sky = new THREE.Mesh(skyGeo, skyMat);
     this.scene.add(this.sky);
   }
-  
-  newStructureMaterial(map) {
+
+  newStructureMaterial(map, color) {
     return new THREE.MeshPhongMaterial({
-      color: 0x101010,
+      color: color,
       side: THREE.DoubleSide,
       map: map ? map : null
     });

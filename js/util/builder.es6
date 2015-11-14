@@ -39,7 +39,7 @@ export function createWall(options) {
   var direction = options.direction || 'left';
   var roomLength = options.roomLength || 100;
   var wallHeight = options.wallHeight || 100;
-  var rawMaterial = options.rawMaterial || new THREE.MeshPhongMaterial({
+  var rawMaterial = options.material || new THREE.MeshPhongMaterial({
     color: 0x101010,
     side: THREE.DoubleSide
   });
