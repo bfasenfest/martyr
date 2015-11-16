@@ -72,18 +72,19 @@ export class MainScene extends SheenScene {
         // material.bumpMap = skindisp;
         // material.bumpScale = 0.5;
       });
-      
-      var verticalMirror = new THREE.Mirror( this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color:0x889999 } );
-      var mirrorMaterial = verticalMirror.material;
 
-			var verticalMirrorMesh = new THREE.Mesh( new THREE.PlaneGeometry(40, 40, 40), mirrorMaterial );
-			verticalMirrorMesh.add( verticalMirror );
-			verticalMirrorMesh.position.y = 5;
-			verticalMirrorMesh.position.z = -100;
-      verticalMirrorMesh.position.x = 0;
-			this.scene.add(verticalMirrorMesh);
+      this.mirrorA = new THREE.Mirror( this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color:0x889999 } );
+      this.mirrorAMesh = this.makeMirrorPlaneMesh(this.mirrorA, {
+        position: new THREE.Vector3(0, 5, -50)
+      });
 
-      this.verticalMirror = verticalMirror;
+      this.mirrorB = new THREE.Mirror( this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color:0x889999 } );
+      this.mirrorBMesh = this.makeMirrorPlaneMesh(this.mirrorB, {
+        position: new THREE.Vector3(0, 5, 50)
+      });
+      this.mirrorBMesh.rotation.y = Math.PI;
+
+      this.mirrors = [this.mirrorA, this.mirrorB];
     }
   }
 
@@ -97,8 +98,11 @@ export class MainScene extends SheenScene {
     super.update(dt);
 
     // render (update) the mirrors
-    if (this.verticalMirror) {
-      this.verticalMirror.render();
+    if (this.mirrorA) {
+      this.mirrorA.renderWithMirrors(this.mirrors);
+    }
+    if (this.mirrorB) {
+      this.mirrorB.renderWithMirrors(this.mirrors);
     }
   }
 
@@ -192,6 +196,20 @@ export class MainScene extends SheenScene {
       side: THREE.DoubleSide,
       map: map ? map : null
     });
+  }
+
+  makeMirrorPlaneMesh(mirror, options) {
+    var length = options.length || 40;
+    var position = options.position || new THREE.Vector3(0, 5, 0);
+    console.log(position);
+
+    var geometry = new THREE.PlaneGeometry(length, length, length);
+    var mesh = new THREE.Mesh(geometry, mirror.material);
+    mesh.add(mirror);
+    mesh.position.copy(position);
+
+    this.scene.add(mesh);
+    return mesh;
   }
 
 }

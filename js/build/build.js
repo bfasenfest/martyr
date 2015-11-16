@@ -585,30 +585,53 @@ THREE.Mirror = function (renderer, camera, options) {
 THREE.Mirror.prototype = Object.create(THREE.Object3D.prototype);
 THREE.Mirror.prototype.constructor = THREE.Mirror;
 
-THREE.Mirror.prototype.renderWithMirror = function (otherMirror) {
+THREE.Mirror.prototype.renderWithMirrors = function (otherMirrors) {
+
+	// cleanse self from otherMirrors because that is CONFUSING
+	var trimmedOtherMirrors = [];
+	for (var i = 0; i < otherMirrors.length; i++) {
+		var otherMirror = otherMirrors[i];
+		if (otherMirror !== this) {
+			trimmedOtherMirrors.push(otherMirror);
+		}
+	}
+	otherMirrors = trimmedOtherMirrors;
 
 	// update the mirror matrix to mirror the current view
 	this.updateTextureMatrix();
 	this.matrixNeedsUpdate = false;
 
-	// set the camera of the other mirror so the mirrored view is the reference view
-	var tempCamera = otherMirror.camera;
-	otherMirror.camera = this.mirrorCamera;
+	var tempCameras = [];
+	for (i = 0; i < otherMirrors.length; i++) {
+		var otherMirror = otherMirrors[i];
 
-	// render the other mirror in temp texture
-	otherMirror.renderTemp();
-	otherMirror.material.uniforms.mirrorSampler.value = otherMirror.tempTexture;
+		// set the camera of the other mirror so the mirrored view is the reference view
+		tempCameras.push(otherMirror.camera);
+		otherMirror.camera = this.mirrorCamera;
+
+		// render the other mirror in temp texture
+		otherMirror.renderTemp();
+		otherMirror.material.uniforms.mirrorSampler.value = otherMirror.tempTexture;
+	}
 
 	// render the current mirror
 	this.render();
 	this.matrixNeedsUpdate = true;
 
-	// restore material and camera of other mirror
-	otherMirror.material.uniforms.mirrorSampler.value = otherMirror.texture;
-	otherMirror.camera = tempCamera;
+	for (var i = 0; i < otherMirrors.length; i++) {
+		var otherMirror = otherMirrors[i];
 
-	// restore texture matrix of other mirror
-	otherMirror.updateTextureMatrix();
+		// restore material and camera of other mirror
+		otherMirror.material.uniforms.mirrorSampler.value = otherMirror.texture;
+		otherMirror.camera = tempCameras[i];
+
+		// restore texture matrix of other mirror
+		otherMirror.updateTextureMatrix();
+	}
+};
+
+THREE.Mirror.prototype.renderWithMirror = function (otherMirror) {
+	this.renderWithMirrors([otherMirror]);
 };
 
 THREE.Mirror.prototype.updateTextureMatrix = function () {
@@ -2890,17 +2913,18 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
             // material.bumpScale = 0.5;
           });
 
-          var verticalMirror = new THREE.Mirror(this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color: 8952217 });
-          var mirrorMaterial = verticalMirror.material;
+          this.mirrorA = new THREE.Mirror(this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color: 8952217 });
+          this.mirrorAMesh = this.makeMirrorPlaneMesh(this.mirrorA, {
+            position: new THREE.Vector3(0, 5, -50)
+          });
 
-          var verticalMirrorMesh = new THREE.Mesh(new THREE.PlaneGeometry(40, 40, 40), mirrorMaterial);
-          verticalMirrorMesh.add(verticalMirror);
-          verticalMirrorMesh.position.y = 5;
-          verticalMirrorMesh.position.z = -100;
-          verticalMirrorMesh.position.x = 0;
-          this.scene.add(verticalMirrorMesh);
+          this.mirrorB = new THREE.Mirror(this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color: 8952217 });
+          this.mirrorBMesh = this.makeMirrorPlaneMesh(this.mirrorB, {
+            position: new THREE.Vector3(0, 5, 50)
+          });
+          this.mirrorBMesh.rotation.y = Math.PI;
 
-          this.verticalMirror = verticalMirror;
+          this.mirrors = [this.mirrorA, this.mirrorB];
         }
       }
     },
@@ -2916,8 +2940,11 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
         _get(Object.getPrototypeOf(MainScene.prototype), "update", this).call(this, dt);
 
         // render (update) the mirrors
-        if (this.verticalMirror) {
-          this.verticalMirror.render();
+        if (this.mirrorA) {
+          this.mirrorA.renderWithMirrors(this.mirrors);
+        }
+        if (this.mirrorB) {
+          this.mirrorB.renderWithMirrors(this.mirrors);
         }
       }
     },
@@ -3013,6 +3040,21 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
           side: THREE.DoubleSide,
           map: map ? map : null
         });
+      }
+    },
+    makeMirrorPlaneMesh: {
+      value: function makeMirrorPlaneMesh(mirror, options) {
+        var length = options.length || 40;
+        var position = options.position || new THREE.Vector3(0, 5, 0);
+        console.log(position);
+
+        var geometry = new THREE.PlaneGeometry(length, length, length);
+        var mesh = new THREE.Mesh(geometry, mirror.material);
+        mesh.add(mirror);
+        mesh.position.copy(position);
+
+        this.scene.add(mesh);
+        return mesh;
       }
     }
   });

@@ -150,31 +150,53 @@ THREE.Mirror = function ( renderer, camera, options ) {
 THREE.Mirror.prototype = Object.create( THREE.Object3D.prototype );
 THREE.Mirror.prototype.constructor = THREE.Mirror;
 
-THREE.Mirror.prototype.renderWithMirror = function ( otherMirror ) {
+THREE.Mirror.prototype.renderWithMirrors = function(otherMirrors) {
+
+	// cleanse self from otherMirrors because that is CONFUSING
+	var trimmedOtherMirrors = [];
+	for (var i = 0; i < otherMirrors.length; i++) {
+		var otherMirror = otherMirrors[i];
+		if (otherMirror !== this) {
+			trimmedOtherMirrors.push(otherMirror);
+		}
+	}
+	otherMirrors = trimmedOtherMirrors;
 
 	// update the mirror matrix to mirror the current view
 	this.updateTextureMatrix();
 	this.matrixNeedsUpdate = false;
 
-	// set the camera of the other mirror so the mirrored view is the reference view
-	var tempCamera = otherMirror.camera;
-	otherMirror.camera = this.mirrorCamera;
+	var tempCameras = [];
+	for (i = 0; i < otherMirrors.length; i++) {
+		var otherMirror = otherMirrors[i];
 
-	// render the other mirror in temp texture
-	otherMirror.renderTemp();
-	otherMirror.material.uniforms.mirrorSampler.value = otherMirror.tempTexture;
+		// set the camera of the other mirror so the mirrored view is the reference view
+		tempCameras.push(otherMirror.camera);
+		otherMirror.camera = this.mirrorCamera;
+
+		// render the other mirror in temp texture
+		otherMirror.renderTemp();
+		otherMirror.material.uniforms.mirrorSampler.value = otherMirror.tempTexture;
+	}
 
 	// render the current mirror
 	this.render();
 	this.matrixNeedsUpdate = true;
 
-	// restore material and camera of other mirror
-	otherMirror.material.uniforms.mirrorSampler.value = otherMirror.texture;
-	otherMirror.camera = tempCamera;
+	for (var i = 0; i < otherMirrors.length; i++) {
+		var otherMirror = otherMirrors[i];
 
-	// restore texture matrix of other mirror
-	otherMirror.updateTextureMatrix();
+		// restore material and camera of other mirror
+		otherMirror.material.uniforms.mirrorSampler.value = otherMirror.texture;
+		otherMirror.camera = tempCameras[i];
 
+		// restore texture matrix of other mirror
+		otherMirror.updateTextureMatrix();
+	}
+};
+
+THREE.Mirror.prototype.renderWithMirror = function ( otherMirror ) {
+	this.renderWithMirrors([otherMirror]);
 };
 
 THREE.Mirror.prototype.updateTextureMatrix = function () {
