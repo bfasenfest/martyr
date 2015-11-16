@@ -2854,11 +2854,6 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
 
         this.controlObject = this.controls.getObject();
 
-        var skindisp = THREE.ImageUtils.loadTexture("/media/skindisp.png");
-        skindisp.wrapS = THREE.RepeatWrapping;
-        skindisp.wrapT = THREE.RepeatWrapping;
-        skindisp.repeat.set(10, 10);
-
         if (!this.domMode) {
           // the heaven and the lights
           this.makeLights();
@@ -2886,20 +2881,14 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
           man.addTo(this.controlObject, function () {
             man.rotate(0, Math.PI * (11 / 10), 0);
 
-            var material = man.mesh.material.materials[0];
-            //material.bumpMap = skindisp;
-            //material.bumpScale = 0.5;
+            // var material = man.mesh.material.materials[0];
+            //
+            // var skindisp = THREE.ImageUtils.loadTexture( "/media/skindisp.png" );
+            // skindisp.wrapS = skindisp.wrapT = THREE.RepeatWrapping;
+            // skindisp.repeat.set(10, 10);
+            // material.bumpMap = skindisp;
+            // material.bumpScale = 0.5;
           });
-
-          var planeGeo = new THREE.PlaneBufferGeometry(100.1, 100.1);
-
-          var groundMirror = new THREE.Mirror(this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color: 7829367 });
-          var mirrorMesh = new THREE.Mesh(planeGeo, groundMirror.material);
-          mirrorMesh.add(groundMirror);
-          mirrorMesh.rotateX(-Math.PI / 2);
-          this.scene.add(mirrorMesh);
-
-          this.groundMirror = groundMirror;
 
           var verticalMirror = new THREE.Mirror(this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color: 8952217 });
           var verticalMirrorMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(60, 60), verticalMirror.material);
@@ -2925,8 +2914,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
 
         // render (update) the mirrors
         if (this.verticalMirror) {
-          this.verticalMirror.renderWithMirror(this.groundMirror);
-          this.groundMirror.renderWithMirror(this.verticalMirror);
+          this.verticalMirror.render();
         }
       }
     },

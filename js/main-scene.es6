@@ -32,11 +32,6 @@ export class MainScene extends SheenScene {
 
     this.controlObject = this.controls.getObject();
 
-    var skindisp = THREE.ImageUtils.loadTexture( "/media/skindisp.png" );
-    skindisp.wrapS = THREE.RepeatWrapping;
-    skindisp.wrapT = THREE.RepeatWrapping;
-    skindisp.repeat.set(10, 10);
-
     if (!this.domMode) {
       // the heaven and the lights
       this.makeLights();
@@ -69,21 +64,14 @@ export class MainScene extends SheenScene {
       man.addTo(this.controlObject, () => {
         man.rotate(0, Math.PI * (11/10), 0);
 
-        var material = man.mesh.material.materials[0];
-        //material.bumpMap = skindisp;
-        //material.bumpScale = 0.5;
+        // var material = man.mesh.material.materials[0];
+        //
+        // var skindisp = THREE.ImageUtils.loadTexture( "/media/skindisp.png" );
+        // skindisp.wrapS = skindisp.wrapT = THREE.RepeatWrapping;
+        // skindisp.repeat.set(10, 10);
+        // material.bumpMap = skindisp;
+        // material.bumpScale = 0.5;
       });
-
-      var planeGeo = new THREE.PlaneBufferGeometry( 100.1, 100.1 );
-
-      var groundMirror = new THREE.Mirror(this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color: 0x777777 } );
-			var mirrorMesh = new THREE.Mesh( planeGeo, groundMirror.material );
-			mirrorMesh.add( groundMirror );
-			mirrorMesh.rotateX( - Math.PI / 2 );
-			this.scene.add( mirrorMesh );
-
-      this.groundMirror = groundMirror; 
-
 
       var verticalMirror = new THREE.Mirror( this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color:0x889999 } );
 			var verticalMirrorMesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 60, 60 ), verticalMirror.material );
@@ -107,8 +95,7 @@ export class MainScene extends SheenScene {
 
     // render (update) the mirrors
     if (this.verticalMirror) {
-      this.verticalMirror.renderWithMirror(this.groundMirror);
-      this.groundMirror.renderWithMirror(this.verticalMirror);
+      this.verticalMirror.render();
     }
   }
 
