@@ -2915,24 +2915,24 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
 
           this.mirrorA = new THREE.Mirror(this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color: 8952217 });
           this.mirrorAMesh = this.makeMirrorPlaneMesh(this.mirrorA, {
-            position: new THREE.Vector3(0, 5, -20),
+            position: new THREE.Vector3(0, 5, -50),
             length: 100 });
 
           this.mirrorB = new THREE.Mirror(this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color: 8952217 });
           this.mirrorBMesh = this.makeMirrorPlaneMesh(this.mirrorB, {
-            position: new THREE.Vector3(0, 5, 20),
+            position: new THREE.Vector3(0, 5, 50),
             length: 100 });
           this.mirrorBMesh.rotation.y = Math.PI;
 
           this.mirrorC = new THREE.Mirror(this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color: 8952217 });
           this.mirrorCMesh = this.makeMirrorPlaneMesh(this.mirrorC, {
-            position: new THREE.Vector3(-50, 5, 20),
+            position: new THREE.Vector3(-50, 5, 0),
             length: 100 });
           this.mirrorCMesh.rotation.y = Math.PI / 2;
 
           this.mirrorD = new THREE.Mirror(this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color: 8952217 });
           this.mirrorDMesh = this.makeMirrorPlaneMesh(this.mirrorD, {
-            position: new THREE.Vector3(50, 5, 20),
+            position: new THREE.Vector3(50, 5, 0),
             length: 100 });
           this.mirrorDMesh.rotation.y = -Math.PI / 2;
 
