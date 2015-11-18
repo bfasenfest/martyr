@@ -123,13 +123,11 @@ THREE.Mirror = function ( renderer, camera, options ) {
 	var mirrorShader = THREE.ShaderLib[ "mirror" ];
 	var mirrorUniforms = THREE.UniformsUtils.clone( mirrorShader.uniforms );
 
-	this.material = new THREE.ShaderMaterial( {
-
+	this.material = new THREE.ShaderMaterial({
 		fragmentShader: mirrorShader.fragmentShader,
 		vertexShader: mirrorShader.vertexShader,
 		uniforms: mirrorUniforms
-
-	} );
+	});
 
 	this.material.uniforms.mirrorSampler.value = this.texture;
 	this.material.uniforms.mirrorColor.value = mirrorColor;

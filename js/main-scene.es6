@@ -31,6 +31,7 @@ export class MainScene extends SheenScene {
     // HERE YOU DO STUFF THAT STARTS IMMEDIATELY
 
     this.controlObject = this.controls.getObject();
+    this.mirrors = [];
 
     if (!this.domMode) {
       // the heaven and the lights
@@ -73,48 +74,8 @@ export class MainScene extends SheenScene {
         // material.bumpScale = 0.5;
       });
 
-      this.mirrorA = new THREE.Mirror( this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color:0x889999 } );
-      this.mirrorAMesh = this.makeMirrorPlaneMesh(this.mirrorA, {
-        position: new THREE.Vector3(0, 5, -50),
-        length: 100,
-      });
-
-      this.mirrorB = new THREE.Mirror( this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color:0x889999 } );
-      this.mirrorBMesh = this.makeMirrorPlaneMesh(this.mirrorB, {
-        position: new THREE.Vector3(0, 5, 50),
-        length: 100,
-      });
-      this.mirrorBMesh.rotation.y = Math.PI;
-
-      this.mirrorC = new THREE.Mirror( this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color:0x889999 } );
-      this.mirrorCMesh = this.makeMirrorPlaneMesh(this.mirrorC, {
-        position: new THREE.Vector3(-50, 5, 0),
-        length: 100,
-      });
-      this.mirrorCMesh.rotation.y = Math.PI/2;
-
-      this.mirrorD = new THREE.Mirror( this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color:0x889999 } );
-      this.mirrorDMesh = this.makeMirrorPlaneMesh(this.mirrorD, {
-        position: new THREE.Vector3(50, 5, 0),
-        length: 100,
-      });
-      this.mirrorDMesh.rotation.y = -Math.PI/2;
-
-      this.mirrorE = new THREE.Mirror( this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color:0x889999 } );
-      this.mirrorEMesh = this.makeMirrorPlaneMesh(this.mirrorE, {
-        position: new THREE.Vector3(0, 1, 0),
-        length: 100,
-      });
-      this.mirrorEMesh.rotation.x = -Math.PI/2;
-
-      this.mirrorF = new THREE.Mirror( this.renderer, this.camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color:0x889999 } );
-      this.mirrorFMesh = this.makeMirrorPlaneMesh(this.mirrorF, {
-        position: new THREE.Vector3(0, 50, 0),
-        length: 100,
-      });
-      this.mirrorFMesh.rotation.x = Math.PI/2;
-
-      this.mirrors = [this.mirrorA, this.mirrorB, this.mirrorC, this.mirrorD, this.mirrorE, this.mirrorF];
+      var mirrorCube = this.makeMirrorCube({});
+      this.scene.add(mirrorCube);
     }
   }
 
@@ -128,23 +89,11 @@ export class MainScene extends SheenScene {
     super.update(dt);
 
     // render (update) the mirrors
-    if (this.mirrorA) {
-      this.mirrorA.renderWithMirrors(this.mirrors);
-    }
-    if (this.mirrorB) {
-      this.mirrorB.renderWithMirrors(this.mirrors);
-    }
-    if (this.mirrorC) {
-      this.mirrorC.renderWithMirrors(this.mirrors);
-    }
-    if (this.mirrorD) {
-      this.mirrorD.renderWithMirrors(this.mirrors);
-    }
-    if (this.mirrorE) {
-      this.mirrorE.renderWithMirrors(this.mirrors);
-    }
-    if (this.mirrorF) {
-      this.mirrorF.renderWithMirrors(this.mirrors);
+    if (this.mirrors) {
+      for (var i = 0; i < this.mirrors.length; i++) {
+        var mirror = this.mirrors[i];
+        mirror.renderWithMirrors(this.mirrors);
+      }
     }
   }
 
@@ -240,18 +189,85 @@ export class MainScene extends SheenScene {
     });
   }
 
+  makeMirror() {
+    var mirror = new THREE.Mirror(this.renderer, this.camera, {
+      clipBias: 0.003,
+      textureWidth: window.innerWidth,
+      textureHeight: window.innerHeight,
+      color: 0x889999
+    });
+
+    this.mirrors.push(mirror);
+
+    return mirror;
+  }
+
+  makeMirrorCube(options) {
+    var length = options.length || 50;
+    var centerPosition = options.position || new THREE.Vector3(0, length/2, 0);
+
+    var frontMirror = this.makeMirror();
+    var frontMirrorMesh = this.makeMirrorPlaneMesh(frontMirror, {
+      position: new THREE.Vector3(centerPosition.x, centerPosition.y, centerPosition.z - length/2),
+      length: length,
+    });
+
+    var backMirror = this.makeMirror();
+    var backMirrorMesh = this.makeMirrorPlaneMesh(backMirror, {
+      position: new THREE.Vector3(centerPosition.x, centerPosition.y, centerPosition.z + length/2),
+      length: length,
+    });
+    backMirrorMesh.rotation.y = Math.PI;
+
+    var leftMirror = this.makeMirror();
+    var leftMirrorMesh = this.makeMirrorPlaneMesh(leftMirror, {
+      position: new THREE.Vector3(centerPosition.x - length/2, centerPosition.y, centerPosition.z),
+      length: length,
+    });
+    leftMirrorMesh.rotation.y = Math.PI/2;
+
+    var rightMirror = this.makeMirror();
+    var rightMirrorMesh = this.makeMirrorPlaneMesh(rightMirror, {
+      position: new THREE.Vector3(centerPosition.x + length/2, centerPosition.y, centerPosition.z),
+      length: length,
+    });
+    rightMirrorMesh.rotation.y = -Math.PI/2;
+
+    var bottomMirror = this.makeMirror();
+    var bottomMirrorMesh = this.makeMirrorPlaneMesh(bottomMirror, {
+      position: new THREE.Vector3(centerPosition.x, centerPosition.y - length/2 + 1, centerPosition.z),
+      length: length,
+    });
+    bottomMirrorMesh.rotation.x = -Math.PI/2;
+
+    var topMirror = this.makeMirror();
+    var topMirrorMesh = this.makeMirrorPlaneMesh(topMirror, {
+      position: new THREE.Vector3(centerPosition.x, centerPosition.y + length/2, centerPosition.z),
+      length: length,
+    });
+    topMirrorMesh.rotation.x = Math.PI/2;
+
+    var cubeContainer = new THREE.Object3D();
+    cubeContainer.add(frontMirrorMesh);
+    cubeContainer.add(backMirrorMesh);
+    cubeContainer.add(leftMirrorMesh);
+    cubeContainer.add(rightMirrorMesh);
+    cubeContainer.add(bottomMirrorMesh);
+    cubeContainer.add(topMirrorMesh);
+
+    return cubeContainer;
+  }
+
   makeMirrorPlaneMesh(mirror, options) {
     var length = options.length || 40;
     var height = options.height || length;
     var position = options.position || new THREE.Vector3(0, 5, 0);
-    console.log(position);
 
     var geometry = new THREE.PlaneGeometry(length, height);
     var mesh = new THREE.Mesh(geometry, mirror.material);
     mesh.add(mirror);
     mesh.position.copy(position);
 
-    this.scene.add(mesh);
     return mesh;
   }
 
