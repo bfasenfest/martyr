@@ -74,7 +74,9 @@ export class MainScene extends SheenScene {
         // material.bumpScale = 0.5;
       });
 
-      var mirrorCube = this.makeMirrorCube({});
+      var mirrorCube = this.makeMirrorCube({
+        faceOutward: false /* set to false for a cube where you can be inside of it, true for a cube you look at from outside */
+      });
       this.scene.add(mirrorCube);
     }
   }
@@ -205,47 +207,49 @@ export class MainScene extends SheenScene {
   makeMirrorCube(options) {
     var length = options.length || 50;
     var centerPosition = options.position || new THREE.Vector3(0, length/2, 0);
+    var faceOutward = options.faceOutward !== undefined ? options.faceOutward : false;
 
     var frontMirror = this.makeMirror();
     var frontMirrorMesh = this.makeMirrorPlaneMesh(frontMirror, {
       position: new THREE.Vector3(centerPosition.x, centerPosition.y, centerPosition.z - length/2),
       length: length,
     });
+    frontMirrorMesh.rotation.y = faceOutward ? Math.PI : 0;
 
     var backMirror = this.makeMirror();
     var backMirrorMesh = this.makeMirrorPlaneMesh(backMirror, {
       position: new THREE.Vector3(centerPosition.x, centerPosition.y, centerPosition.z + length/2),
       length: length,
     });
-    backMirrorMesh.rotation.y = Math.PI;
+    backMirrorMesh.rotation.y = faceOutward ? 0 : Math.PI;
 
     var leftMirror = this.makeMirror();
     var leftMirrorMesh = this.makeMirrorPlaneMesh(leftMirror, {
       position: new THREE.Vector3(centerPosition.x - length/2, centerPosition.y, centerPosition.z),
       length: length,
     });
-    leftMirrorMesh.rotation.y = Math.PI/2;
+    leftMirrorMesh.rotation.y = faceOutward ? -Math.PI/2 : Math.PI/2;
 
     var rightMirror = this.makeMirror();
     var rightMirrorMesh = this.makeMirrorPlaneMesh(rightMirror, {
       position: new THREE.Vector3(centerPosition.x + length/2, centerPosition.y, centerPosition.z),
       length: length,
     });
-    rightMirrorMesh.rotation.y = -Math.PI/2;
+    rightMirrorMesh.rotation.y = faceOutward ? Math.PI/2 : -Math.PI/2;
 
     var bottomMirror = this.makeMirror();
     var bottomMirrorMesh = this.makeMirrorPlaneMesh(bottomMirror, {
       position: new THREE.Vector3(centerPosition.x, centerPosition.y - length/2 + 1, centerPosition.z),
       length: length,
     });
-    bottomMirrorMesh.rotation.x = -Math.PI/2;
+    bottomMirrorMesh.rotation.x = faceOutward ? Math.PI/2 : -Math.PI/2;
 
     var topMirror = this.makeMirror();
     var topMirrorMesh = this.makeMirrorPlaneMesh(topMirror, {
       position: new THREE.Vector3(centerPosition.x, centerPosition.y + length/2, centerPosition.z),
       length: length,
     });
-    topMirrorMesh.rotation.x = Math.PI/2;
+    topMirrorMesh.rotation.x = faceOutward ? -Math.PI/2 : Math.PI/2;
 
     var cubeContainer = new THREE.Object3D();
     cubeContainer.add(frontMirrorMesh);
