@@ -19,8 +19,9 @@ export class MainScene extends SheenScene {
     super(renderer, camera, scene, options);
 
     this.onPhone = options.onPhone || false;
-    this.roomLength = 300;
+    this.roomLength = 400;
     this.halfLength = this.roomLength/2;
+    this.mirrorLength = options.mirrorLength || 20;
   }
 
   /// Overrides
@@ -100,26 +101,47 @@ export class MainScene extends SheenScene {
         //material.bumpScale = 0.5;
       });
 
+      var cloudMirror = this.makeMirror();
+
+      var cloudgate = new SheenMesh({
+        modelName: 'js/models/cloudgate2.js',
+        scale: 2,
+        ignorePhysics: true,
+        rotation: new THREE.Vector3(Math.PI/2, 0, 0),
+        position: new THREE.Vector3(-50, 150, -50)
+      });
+
+      cloudgate.addTo(this.scene);
+      // cant figure out how to make the cloudgate have a mirror material -- some things I tried actually made the cubes disappear instead
+
+
       var mirrorCube = this.makeMirrorCube({
         faceOutward: true, /* set to false for a cube where you can be inside of it, true for a cube you look at from outside */
-        length: 20,
+        length: this.mirrorLength,
         position: new THREE.Vector3(100, 0, 100)
       });
       this.scene.add(mirrorCube);
 
       var mirrorCube2 = this.makeMirrorCube({
         faceOutward: true, /* set to false for a cube where you can be inside of it, true for a cube you look at from outside */
-        length: 20,
-        position: new THREE.Vector3(0, 0, 100)
+        length: this.mirrorLength,
+        position: new THREE.Vector3(50, 0, 100)
       });
-      //this.scene.add(mirrorCube2);
+      this.scene.add(mirrorCube2);
 
       var mirrorCube3 = this.makeMirrorCube({
         faceOutward: true, /* set to false for a cube where you can be inside of it, true for a cube you look at from outside */
-        length: 20,
-        position: new THREE.Vector3(-100, 0, 100)
+        length: this.mirrorLength,
+        position: new THREE.Vector3(100, 0, 50)
       });
-      //this.scene.add(mirrorCube3);
+      this.scene.add(mirrorCube3);
+
+      var mirrorCube4 = this.makeMirrorCube({
+        faceOutward: true, /* set to false for a cube where you can be inside of it, true for a cube you look at from outside */
+        length: 20,
+        position: new THREE.Vector3(50, 0, 50)
+      });
+      this.scene.add(mirrorCube4);
     }
   }
 
@@ -132,11 +154,10 @@ export class MainScene extends SheenScene {
   update(dt) {
     super.update(dt);
 
-    // render (update) the mirrors
     if (this.mirrors) {
       for (var i = 0; i < this.mirrors.length; i++) {
         var mirror = this.mirrors[i];
-        mirror.renderWithMirrors(this.mirrors);
+        mirror.render();
       }
     }
   }
@@ -309,7 +330,7 @@ export class MainScene extends SheenScene {
   makeMirrorPlaneMesh(mirror, options) {
     var length = options.length || 40;
     var height = options.height || length;
-    var position = options.position || new THREE.Vector3(0, 5, 0);
+    var position = options.position || new THREE.Vector3(0, 0, 0);
 
     var geometry = new THREE.PlaneGeometry(length, height);
     var mesh = new THREE.Mesh(geometry, mirror.material);
