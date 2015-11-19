@@ -3038,8 +3038,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
         var mirror = new THREE.Mirror(this.renderer, this.camera, {
           clipBias: 0.003,
           textureWidth: window.innerWidth,
-          textureHeight: window.innerHeight,
-          color: 8952217
+          textureHeight: window.innerHeight
         });
 
         this.mirrors.push(mirror);

@@ -195,8 +195,7 @@ export class MainScene extends SheenScene {
     var mirror = new THREE.Mirror(this.renderer, this.camera, {
       clipBias: 0.003,
       textureWidth: window.innerWidth,
-      textureHeight: window.innerHeight,
-      color: 0x889999
+      textureHeight: window.innerHeight
     });
 
     this.mirrors.push(mirror);
