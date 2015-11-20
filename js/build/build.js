@@ -2949,7 +2949,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
             position: new THREE.Vector3(-50, 150, -50)
           });
 
-          cloudgate.addTo(this.scene);
+          cloudgate.addTo(this.scene, function () {});
           // cant figure out how to make the cloudgate have a mirror material -- some things I tried actually made the cubes disappear instead
 
           var mirrorCube = this.makeMirrorCube({
@@ -3181,6 +3181,9 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
 
   return MainScene;
 })(SheenScene);
+
+// here you would rotate like:
+// cloudgate.rotate(x, y, z);
 
 },{"./lib/Mirror":3,"./lib/buzz":4,"./sheen-mesh":8,"./sheen-scene.es6":9,"./util/builder.es6":11,"jquery":14,"kutility":15,"three":16,"tween.js":17}],7:[function(require,module,exports){
 "use strict";

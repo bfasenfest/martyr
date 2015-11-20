@@ -111,9 +111,11 @@ export class MainScene extends SheenScene {
         position: new THREE.Vector3(-50, 150, -50)
       });
 
-      cloudgate.addTo(this.scene);
+      cloudgate.addTo(this.scene, () => {
+        // here you would rotate like:
+        // cloudgate.rotate(x, y, z);
+      });
       // cant figure out how to make the cloudgate have a mirror material -- some things I tried actually made the cubes disappear instead
-
 
       var mirrorCube = this.makeMirrorCube({
         faceOutward: true, /* set to false for a cube where you can be inside of it, true for a cube you look at from outside */
