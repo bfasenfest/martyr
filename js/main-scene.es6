@@ -107,13 +107,12 @@ export class MainScene extends SheenScene {
         modelName: 'js/models/cloudgate2.js',
         scale: 2,
         ignorePhysics: true,
-        rotation: new THREE.Vector3(Math.PI/2, 0, 0),
-        position: new THREE.Vector3(-50, 150, -50)
+        position: new THREE.Vector3(-150, 35, -50)
       });
 
       cloudgate.addTo(this.scene, () => {
         // here you would rotate like:
-        // cloudgate.rotate(x, y, z);
+         cloudgate.rotate(3*Math.PI/2, 0, 0);
       });
       // cant figure out how to make the cloudgate have a mirror material -- some things I tried actually made the cubes disappear instead
 
