@@ -2836,6 +2836,7 @@ var kt = require("kutility");
 require("./lib/Mirror");
 var TWEEN = require("tween.js");
 var SheenMesh = require("./sheen-mesh");
+var loader = require("./util/model-loader");
 
 var _utilBuilderEs6 = require("./util/builder.es6");
 
@@ -2913,9 +2914,19 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
             length: this.roomLength,
             y: 0,
             material: groundMaterial
-
           });
           this.ground.addTo(this.scene);
+
+          this.ceiling = createGround({
+            length: this.roomLength,
+            y: this.roomLength,
+            material: new THREE.MeshBasicMaterial({
+              side: THREE.DoubleSide,
+              map: THREE.ImageUtils.loadTexture("/media/ceiling.jpg")
+            })
+          });
+          this.ceiling.addTo(this.scene);
+
           this.walls = [createWall({ direction: "back", roomLength: this.roomLength, wallHeight: this.roomLength, material: wallMaterial }), createWall({ direction: "left", roomLength: this.roomLength, wallHeight: this.roomLength, material: wallMaterial }), createWall({ direction: "right", roomLength: this.roomLength, wallHeight: this.roomLength, material: wallMaterial }), createWall({ direction: "front", roomLength: this.roomLength, wallHeight: this.roomLength, material: wallMaterial })];
           this.walls.forEach(function (wall) {
             wall.addTo(_this.scene);
@@ -2939,20 +2950,26 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
             //material.bumpScale = 0.5;
           });
 
-          var cloudMirror = this.makeMirror();
+          // here is how u can update a wall texture
+          //this.walls[0].mesh.material.map = THREE.ImageUtils.loadTexture('url');
 
-          var cloudgate = new SheenMesh({
-            modelName: "js/models/cloudgate2.js",
-            scale: 2,
-            ignorePhysics: true,
-            position: new THREE.Vector3(-150, 35, -50)
-          });
+          // here is how to change opacity
+          // mesh.material.transparent = true;
+          // mesh.material.opacity = 0.5;
 
-          cloudgate.addTo(this.scene, function () {
-            // here you would rotate like:
-            cloudgate.rotate(3 * Math.PI / 2, 0, 0);
+          loader("js/models/cloudgate2.js", function (geometry) {
+            var cloudMirror = _this.makeMirror();
+
+            var material = cloudMirror.material;
+
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.add(cloudMirror);
+            mesh.scale.set(2, 2, 2);
+            mesh.position.copy(new THREE.Vector3(-150, 35, -50));
+            mesh.rotation.x = 3 * Math.PI / 2;
+
+            _this.scene.add(mesh);
           });
-          // cant figure out how to make the cloudgate have a mirror material -- some things I tried actually made the cubes disappear instead
 
           var mirrorCube = this.makeMirrorCube({
             faceOutward: true, /* set to false for a cube where you can be inside of it, true for a cube you look at from outside */
@@ -3070,8 +3087,6 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
           exponent: { type: "f", value: 0.75 }
         };
 
-        this.renderer.setClearColor(uniforms.topColor.value, 1);
-
         if (this.scene.fog) {
           this.scene.fog.color.copy(uniforms.bottomColor.value);
         }
@@ -3184,7 +3199,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
   return MainScene;
 })(SheenScene);
 
-},{"./lib/Mirror":3,"./lib/buzz":4,"./sheen-mesh":8,"./sheen-scene.es6":9,"./util/builder.es6":11,"jquery":14,"kutility":15,"three":16,"tween.js":17}],7:[function(require,module,exports){
+},{"./lib/Mirror":3,"./lib/buzz":4,"./sheen-mesh":8,"./sheen-scene.es6":9,"./util/builder.es6":11,"./util/model-loader":13,"jquery":14,"kutility":15,"three":16,"tween.js":17}],7:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -3240,8 +3255,8 @@ var Sheen = (function (_ThreeBoiler) {
     this.controls = new FlyControls(this.camera, {
       allowYMovement: false,
       movementSpeed: 15,
-      restrictedXRange: { min: -145, max: 145 },
-      restrictedZRange: { min: -145, max: 145 }
+      restrictedXRange: { min: -195, max: 195 },
+      restrictedZRange: { min: -195, max: 195 }
     });
     this.scene.add(this.controls.getObject());
 

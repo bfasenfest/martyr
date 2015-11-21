@@ -39,8 +39,8 @@ class Sheen extends ThreeBoiler {
     this.controls = new FlyControls(this.camera, {
       allowYMovement: false,
       movementSpeed: 15.0,
-      restrictedXRange: {min: -145, max: 145},
-      restrictedZRange: {min: -145, max: 145}
+      restrictedXRange: {min: -195, max: 195},
+      restrictedZRange: {min: -195, max: 195}
     });
     this.scene.add(this.controls.getObject());
 
