@@ -3191,7 +3191,7 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
       value: function createPile(options) {
         if (!options) options = {};
         var pileSize = options.pileSize || 120;
-        var pebbleModelNames = ["js/models/pebble1.json"];
+        var pebbleModelNames = ["js/models/pebble1.json", "js/models/pebble2.json", "js/models/pebble3.json", "js/models/pebble4.json", "js/models/pebble5.json", "js/models/pebble6.json", "js/models/pebble7.json"];
         var pile = new THREE.Object3D();
 
         var addToPile = function () {
@@ -3203,12 +3203,12 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
 
             var mesh = new THREE.Mesh(geometry.clone(), material);
 
-            var scale = Math.random() * 1.25 + 0.01;
+            var scale = Math.random() * 0.5 + 0.05;
             mesh.scale.set(scale, scale, scale);
 
-            mesh.position.x = (Math.random() - 0.5) * 12;
-            mesh.position.y = Math.random() * 5 + 0.5;
-            mesh.position.z = (Math.random() - 0.5) * 12;
+            mesh.position.x = (Math.random() - 0.5) * 8;
+            mesh.position.y = Math.random() * 2 + 0.5;
+            mesh.position.z = (Math.random() - 0.5) * 8;
 
             mesh.rotation.x = Math.random() * 2 * Math.PI;
 
