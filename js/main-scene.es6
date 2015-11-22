@@ -103,13 +103,13 @@ export class MainScene extends SheenScene {
       man.addTo(this.controlObject, () => {
         man.rotate(0, Math.PI * (11/10), 0);
 
-        //var material = man.mesh.material.materials[0];
-
-        var skindisp = THREE.ImageUtils.loadTexture( "/media/skindisp.png" );
-        skindisp.wrapS = skindisp.wrapT = THREE.RepeatWrapping;
-        skindisp.repeat.set(10, 10);
-        //material.bumpMap = skindisp;
-        //material.bumpScale = 0.5;
+        // var skindisp = THREE.ImageUtils.loadTexture( "/media/skindisp.png" );
+        // skindisp.wrapS = skindisp.wrapT = THREE.RepeatWrapping;
+        // skindisp.repeat.set(10, 10);
+        //
+        // var material = man.mesh.material.materials[0];
+        // material.bumpMap = skindisp;
+        // material.bumpScale = 0.5;
       });
 
       // here is how u can update a wall texture
@@ -119,19 +119,12 @@ export class MainScene extends SheenScene {
       // mesh.material.transparent = true;
       // mesh.material.opacity = 0.5;
 
-      loader('js/models/cloudgate2.js', (geometry) => {
-        var cloudMirror = this.makeMirror();
+      var pile = this.createPile();
+      this.scene.add(pile);
 
-        var material = cloudMirror.material;
-
-        var mesh = new THREE.Mesh(geometry, material);
-        mesh.add(cloudMirror);
-        mesh.scale.set(2,2,2);
-        mesh.position.copy(new THREE.Vector3(-150, 35, -50));
-        mesh.rotation.x = 3 * Math.PI/2;
-
-        this.scene.add(mesh);
-      });
+      var pile2 = this.createPile();
+      pile2.position.x = -50;
+      this.scene.add(pile2);
 
       var mirrorCube = this.makeMirrorCube({
         faceOutward: true, /* set to false for a cube where you can be inside of it, true for a cube you look at from outside */
@@ -354,6 +347,41 @@ export class MainScene extends SheenScene {
     mesh.position.copy(position);
 
     return mesh;
+  }
+
+  createPile(options) {
+    if (!options) options = {};
+    var pileSize = options.pileSize || 120;
+    var pebbleModelNames = ['js/models/pebble1.json'];
+    var pile = new THREE.Object3D();
+
+    var addToPile = () => {
+      var modelName = kt.choice(pebbleModelNames);
+      loader(modelName, (geometry) => {
+        var material = new THREE.MeshPhongMaterial({
+          color: new THREE.Color(0xA17F4E)
+        });
+
+        var mesh = new THREE.Mesh(geometry.clone(), material);
+
+        var scale = Math.random() * 1.25 + 0.01;
+        mesh.scale.set(scale, scale, scale);
+
+        mesh.position.x = (Math.random() - 0.5) * 12;
+        mesh.position.y = Math.random() * 5 + 0.5;
+        mesh.position.z = (Math.random() - 0.5) * 12;
+
+        mesh.rotation.x = Math.random() * 2 * Math.PI;
+
+        pile.add(mesh);
+      });
+    };
+
+    for (var i = 0; i < pileSize; i++) {
+      addToPile();
+    }
+
+    return pile;
   }
 
 }

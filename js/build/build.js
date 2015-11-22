@@ -2941,13 +2941,13 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
           man.addTo(this.controlObject, function () {
             man.rotate(0, Math.PI * (11 / 10), 0);
 
-            //var material = man.mesh.material.materials[0];
-
-            var skindisp = THREE.ImageUtils.loadTexture("/media/skindisp.png");
-            skindisp.wrapS = skindisp.wrapT = THREE.RepeatWrapping;
-            skindisp.repeat.set(10, 10);
-            //material.bumpMap = skindisp;
-            //material.bumpScale = 0.5;
+            // var skindisp = THREE.ImageUtils.loadTexture( "/media/skindisp.png" );
+            // skindisp.wrapS = skindisp.wrapT = THREE.RepeatWrapping;
+            // skindisp.repeat.set(10, 10);
+            //
+            // var material = man.mesh.material.materials[0];
+            // material.bumpMap = skindisp;
+            // material.bumpScale = 0.5;
           });
 
           // here is how u can update a wall texture
@@ -2957,19 +2957,12 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
           // mesh.material.transparent = true;
           // mesh.material.opacity = 0.5;
 
-          loader("js/models/cloudgate2.js", function (geometry) {
-            var cloudMirror = _this.makeMirror();
+          var pile = this.createPile();
+          this.scene.add(pile);
 
-            var material = cloudMirror.material;
-
-            var mesh = new THREE.Mesh(geometry, material);
-            mesh.add(cloudMirror);
-            mesh.scale.set(2, 2, 2);
-            mesh.position.copy(new THREE.Vector3(-150, 35, -50));
-            mesh.rotation.x = 3 * Math.PI / 2;
-
-            _this.scene.add(mesh);
-          });
+          var pile2 = this.createPile();
+          pile2.position.x = -50;
+          this.scene.add(pile2);
 
           var mirrorCube = this.makeMirrorCube({
             faceOutward: true, /* set to false for a cube where you can be inside of it, true for a cube you look at from outside */
@@ -3192,6 +3185,42 @@ var MainScene = exports.MainScene = (function (_SheenScene) {
         mesh.position.copy(position);
 
         return mesh;
+      }
+    },
+    createPile: {
+      value: function createPile(options) {
+        if (!options) options = {};
+        var pileSize = options.pileSize || 120;
+        var pebbleModelNames = ["js/models/pebble1.json"];
+        var pile = new THREE.Object3D();
+
+        var addToPile = function () {
+          var modelName = kt.choice(pebbleModelNames);
+          loader(modelName, function (geometry) {
+            var material = new THREE.MeshPhongMaterial({
+              color: new THREE.Color(10583886)
+            });
+
+            var mesh = new THREE.Mesh(geometry.clone(), material);
+
+            var scale = Math.random() * 1.25 + 0.01;
+            mesh.scale.set(scale, scale, scale);
+
+            mesh.position.x = (Math.random() - 0.5) * 12;
+            mesh.position.y = Math.random() * 5 + 0.5;
+            mesh.position.z = (Math.random() - 0.5) * 12;
+
+            mesh.rotation.x = Math.random() * 2 * Math.PI;
+
+            pile.add(mesh);
+          });
+        };
+
+        for (var i = 0; i < pileSize; i++) {
+          addToPile();
+        }
+
+        return pile;
       }
     }
   });
@@ -4114,13 +4143,47 @@ var THREE = require("three");
 
 var loader = new THREE.JSONLoader();
 
+var currentlyLoadingCallbackQueue = {};
+
 module.exports = function loadModel(name, callback) {
   if (typeof callback !== "function") {
     return;
-  }loader.load(name, function (geometry, materials) {
-    callback(geometry, materials);
+  }if (isModelLoading(name)) {
+    addCallbackToModelQueue(name, callback);
+    return;
+  }
+
+  addCallbackToModelQueue(name, callback);
+  loader.load(name, function (geometry, materials) {
+    fullfillCallbacks(name, geometry, materials);
   });
 };
+
+function isModelLoading(name) {
+  return currentlyLoadingCallbackQueue[name] !== undefined;
+}
+
+function addCallbackToModelQueue(name, callback) {
+  if (currentlyLoadingCallbackQueue[name] === undefined) {
+    currentlyLoadingCallbackQueue[name] = [];
+  }
+
+  currentlyLoadingCallbackQueue[name].push(callback);
+}
+
+function fullfillCallbacks(name, geometry, materials) {
+  var queue = currentlyLoadingCallbackQueue[name];
+  if (queue === undefined) {
+    return;
+  }
+
+  for (var i = 0; i < queue.length; i++) {
+    var callback = queue[i];
+    callback(geometry, materials);
+  }
+
+  delete currentlyLoadingCallbackQueue[name];
+}
 
 },{"three":16}],14:[function(require,module,exports){
 /*!
